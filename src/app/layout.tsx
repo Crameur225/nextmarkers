@@ -25,7 +25,14 @@ export const metadata: Metadata = {
   },
   description:
     'Découvrez les meilleurs outils IA, logiciels et équipements tech pour entrepreneurs et créateurs.',
-  icons: { icon: '/favicon.ico' },
+  icons: {
+    icon: [
+      { url: '/icon.png', type: 'image/png', sizes: '32x32' },
+    ],
+    apple: [
+      { url: '/apple-icon.png', sizes: '180x180' },
+    ],
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

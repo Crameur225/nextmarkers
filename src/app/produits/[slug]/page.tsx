@@ -2,7 +2,7 @@ import { api } from '@/lib/api'
 import { ProductImageGallery } from '@/components/product/ProductImageGallery'
 import { BuyButton } from '@/components/product/BuyButton'
 import { notFound } from 'next/navigation'
-import { generatePageMetadata } from '@/lib/seo'
+import { generatePageMetadata, generateProductJsonLd } from '@/lib/seo'
 import type { Metadata } from 'next'
 import { ArrowLeft, Tag } from 'lucide-react'
 import Link from 'next/link'
@@ -36,7 +36,20 @@ export default async function ProduitPage({ params }: Props) {
     notFound()
   }
 
+  const jsonLd = generateProductJsonLd({
+    name: product.name,
+    description: product.description,
+    slug: product.slug,
+    price: product.price,
+    currency: product.currency,
+    images: product.images,
+    affiliateUrl: product.affiliateUrl,
+    provider: product.provider,
+  })
+
   return (
+    <>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
       {/* Breadcrumb */}
       <Link
@@ -58,9 +71,9 @@ export default async function ProduitPage({ params }: Props) {
             <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-green-500/10 text-green-500">
               {product.category}
             </span>
-            {product.provider === 'amazon' && (
-              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-orange-500/10 text-orange-500">
-                Amazon
+            {product.provider !== 'default' && (
+              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-orange-500/10 text-orange-500 capitalize">
+                {product.provider === 'aliexpress' ? 'AliExpress' : product.provider.charAt(0).toUpperCase() + product.provider.slice(1)}
               </span>
             )}
           </div>
@@ -110,5 +123,6 @@ export default async function ProduitPage({ params }: Props) {
         </div>
       </div>
     </div>
+    </>
   )
 }

@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Post } from '@/lib/api'
+import { RichTextEditor } from './RichTextEditor'
+import { SocialPublisher } from './SocialPublisher'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'
 
@@ -47,7 +49,7 @@ export function AdminPostForm({ initial, id }: Props) {
   const [tagsInput, setTagsInput] = useState((initial?.tags ?? []).join(', '))
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const [tab, setTab] = useState<'edit' | 'preview'>('edit')
+  const [savedSlug, setSavedSlug] = useState(initial?.slug ?? '')
 
   function set<K extends keyof PostDraft>(key: K, value: PostDraft[K]) {
     setForm((prev) => ({ ...prev, [key]: value }))
@@ -77,6 +79,8 @@ export function AdminPostForm({ initial, id }: Props) {
         return
       }
 
+      const saved = await res.json().catch(() => ({})) as { slug?: string }
+      if (saved.slug) setSavedSlug(saved.slug)
       router.push('/admin/posts')
       router.refresh()
     } catch {
@@ -113,8 +117,12 @@ export function AdminPostForm({ initial, id }: Props) {
         <Field label="Catégorie">
           <select value={form.category} onChange={(e) => set('category', e.target.value)} className="field-input">
             <option>IA</option>
-            <option>Amazon</option>
+            <option>Guides</option>
             <option>Productivité</option>
+            <option>Amazon</option>
+            <option>Vidéo</option>
+            <option>Audio</option>
+            <option>Développement</option>
           </select>
         </Field>
         <Field label="Image hero (URL)">
@@ -125,26 +133,10 @@ export function AdminPostForm({ initial, id }: Props) {
         </Field>
       </div>
 
-      {/* Markdown editor with preview toggle */}
-      <div>
-        <div className="flex items-center gap-1 mb-2">
-          <button type="button" onClick={() => setTab('edit')} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${tab === 'edit' ? 'bg-green-500/15 text-green-400' : 'text-(--text-muted) hover:text-(--text-primary)'}`}>Éditer</button>
-          <button type="button" onClick={() => setTab('preview')} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${tab === 'preview' ? 'bg-green-500/15 text-green-400' : 'text-(--text-muted) hover:text-(--text-primary)'}`}>Aperçu (brut)</button>
-        </div>
-        {tab === 'edit' ? (
-          <textarea
-            value={form.content ?? ''}
-            onChange={(e) => set('content', e.target.value)}
-            rows={20}
-            className="field-input resize-y font-mono text-xs"
-            placeholder="Contenu Markdown…"
-          />
-        ) : (
-          <pre className="w-full p-4 rounded-xl bg-(--bg-elevated) border border-(--border-subtle) text-xs text-(--text-secondary) whitespace-pre-wrap font-mono overflow-auto max-h-96">
-            {form.content || 'Aucun contenu.'}
-          </pre>
-        )}
-      </div>
+      {/* Rich text editor */}
+      <Field label="Contenu">
+        <RichTextEditor value={form.content ?? ''} onChange={(html) => set('content', html)} />
+      </Field>
 
       <div className="flex items-center gap-6">
         <label className="flex items-center gap-2 text-sm text-(--text-secondary) cursor-pointer">
@@ -171,6 +163,16 @@ export function AdminPostForm({ initial, id }: Props) {
           Annuler
         </button>
       </div>
+
+      {/* Social publishing — visible only once article is saved */}
+      {savedSlug && form.published && (
+        <SocialPublisher
+          title={form.title}
+          description={form.description}
+          url={`${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://nextmakers.fr'}/blog/${savedSlug}`}
+          imageUrl={form.heroImage ?? undefined}
+        />
+      )}
     </form>
   )
 }

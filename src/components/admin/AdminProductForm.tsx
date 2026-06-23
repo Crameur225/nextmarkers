@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ImageUploader } from './ImageUploader'
+import { SocialPublisher } from './SocialPublisher'
 import type { Product } from '@/lib/api'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'
@@ -52,6 +53,7 @@ export function AdminProductForm({ initial, id }: Props) {
   const [tagsInput, setTagsInput] = useState((initial?.tags ?? []).join(', '))
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [savedSlug, setSavedSlug] = useState(initial?.slug ?? '')
 
   function set<K extends keyof ProductDraft>(key: K, value: ProductDraft[K]) {
     setForm((prev) => ({ ...prev, [key]: value }))
@@ -81,6 +83,8 @@ export function AdminProductForm({ initial, id }: Props) {
         return
       }
 
+      const saved = await res.json().catch(() => ({})) as { slug?: string }
+      if (saved.slug) setSavedSlug(saved.slug)
       router.push('/admin/produits')
       router.refresh()
     } catch {
@@ -155,6 +159,11 @@ export function AdminProductForm({ initial, id }: Props) {
         <Field label="Provider">
           <select value={form.provider} onChange={(e) => set('provider', e.target.value)} className="field-input">
             <option value="amazon">Amazon</option>
+            <option value="fnac">Fnac</option>
+            <option value="darty">Darty</option>
+            <option value="boulanger">Boulanger</option>
+            <option value="aliexpress">AliExpress</option>
+            <option value="cdiscount">Cdiscount</option>
             <option value="default">Autre</option>
           </select>
         </Field>
@@ -196,6 +205,16 @@ export function AdminProductForm({ initial, id }: Props) {
           Annuler
         </button>
       </div>
+
+      {/* Social publishing — visible only once product is saved & published */}
+      {savedSlug && form.published && (
+        <SocialPublisher
+          title={form.name}
+          description={form.shortDesc}
+          url={`${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://nextmakers.fr'}/produits/${savedSlug}`}
+          imageUrl={form.images[0]}
+        />
+      )}
     </form>
   )
 }

@@ -76,7 +76,7 @@ export function GuidesSection() {
         <div className="text-center">
           <Link
             href="/guides"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-white border border-white/15 hover:border-green-500/40 hover:bg-green-500/5 transition-all"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-(--text-primary) border border-(--border-default) hover:border-green-500/40 hover:bg-(--bg-elevated) transition-all"
           >
             Voir tous les guides
             <ArrowRight size={15} />

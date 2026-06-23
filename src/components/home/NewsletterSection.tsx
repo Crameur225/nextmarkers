@@ -75,7 +75,7 @@ export function NewsletterSection() {
                   placeholder="Votre adresse e-mail"
                   required
                   disabled={status === 'loading'}
-                  className="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/15 text-white placeholder:text-(--text-muted) focus:outline-none focus:border-green-500/60 transition-colors disabled:opacity-60"
+                  className="flex-1 px-4 py-3 rounded-xl bg-(--bg-elevated) border border-(--border-default) text-(--text-primary) placeholder:text-(--text-muted) focus:outline-none focus:border-green-500/60 transition-colors disabled:opacity-60"
                 />
                 <button
                   type="submit"

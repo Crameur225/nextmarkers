@@ -6,6 +6,10 @@ import { MDXRemote } from 'next-mdx-remote/rsc'
 import { useMDXComponents } from '@/mdx-components'
 import type { Metadata } from 'next'
 
+function isHtmlContent(content: string) {
+  return content.trimStart().startsWith('<')
+}
+
 interface PageProps {
   params: Promise<{ slug: string }>
 }
@@ -63,7 +67,11 @@ export default async function BlogPostPage({ params }: PageProps) {
         />
 
         <div className="prose prose-invert prose-green max-w-none">
-          <MDXRemote source={post.content ?? ''} components={useMDXComponents({})} />
+          {isHtmlContent(post.content ?? '') ? (
+            <div dangerouslySetInnerHTML={{ __html: post.content ?? '' }} />
+          ) : (
+            <MDXRemote source={post.content ?? ''} components={useMDXComponents({})} />
+          )}
         </div>
       </article>
     </>

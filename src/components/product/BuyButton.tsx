@@ -9,6 +9,11 @@ interface BuyButtonProps {
 
 const providerLabels: Record<string, string> = {
   amazon: 'Acheter sur Amazon',
+  fnac: 'Acheter sur Fnac',
+  darty: 'Acheter sur Darty',
+  boulanger: 'Acheter sur Boulanger',
+  aliexpress: 'Acheter sur AliExpress',
+  cdiscount: 'Acheter sur Cdiscount',
   default: 'Acheter maintenant',
 }
 

@@ -1,14 +1,57 @@
 import Link from 'next/link'
-import { ArrowRight, Sparkles } from 'lucide-react'
+import { ArrowRight, Sparkles, Bot, Cpu, Zap, Code2, Headphones, Smartphone, Laptop, Rocket, Package, Globe, Star, BrainCircuit, ShoppingBag } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 export function HeroSection() {
   return (
     <section className="relative overflow-hidden min-h-[90vh] flex items-center">
-      {/* Background orbs */}
+      {/* Animated background */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
-        <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full bg-green-500/10 blur-[120px] animate-float" />
-        <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full bg-green-400/8 blur-[100px]" style={{ animationDelay: '1.5s' }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full bg-green-600/6 blur-[80px]" />
+        {/* Dot grid */}
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: 'radial-gradient(circle, rgba(34,197,94,0.15) 1px, transparent 1px)',
+            backgroundSize: '44px 44px',
+            animation: 'grid-fade 8s ease-in-out infinite',
+          }}
+        />
+
+        {/* Main orb — top left */}
+        <div
+          className="absolute top-1/4 left-1/4 w-[700px] h-[700px] rounded-full bg-green-500/10 blur-[130px]"
+          style={{ animation: 'pulse-orb 7s ease-in-out infinite' }}
+        />
+
+        {/* Secondary orb — bottom right */}
+        <div
+          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-green-400/8 blur-[110px]"
+          style={{ animation: 'pulse-orb 9s ease-in-out infinite 2s' }}
+        />
+
+        {/* Drifting orb — center */}
+        <div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] rounded-full bg-green-600/6 blur-[90px]"
+          style={{ animation: 'drift 14s ease-in-out infinite' }}
+        />
+
+        {/* Floating tech icons */}
+        {floatingIcons.map((item) => {
+          const Icon = item.icon
+          return (
+            <div
+              key={item.id}
+              className="absolute text-green-400/20"
+              style={{
+                left: item.left,
+                top: item.top,
+                animation: `icon-float ${item.duration}s ease-in-out infinite ${item.delay}s`,
+              }}
+            >
+              <Icon size={item.size} strokeWidth={1.5} />
+            </div>
+          )
+        })}
       </div>
 
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-24 text-center">
@@ -53,7 +96,7 @@ export function HeroSection() {
           </Link>
           <Link
             href="/guides"
-            className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-white border border-white/15 hover:border-white/30 hover:bg-white/5 transition-all duration-200"
+            className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-(--text-primary) border border-(--border-default) hover:border-green-500/40 hover:bg-(--bg-elevated) transition-all duration-200"
           >
             Lire les guides
           </Link>
@@ -72,3 +115,36 @@ export function HeroSection() {
     </section>
   )
 }
+
+interface FloatingIcon {
+  id: number
+  icon: LucideIcon
+  left: string
+  top: string
+  size: number
+  duration: number
+  delay: number
+}
+
+const floatingIcons: FloatingIcon[] = [
+  // Colonne gauche
+  { id: 1,  icon: Bot,         left: '5%',  top: '20%', size: 28, duration: 6,  delay: 0   },
+  { id: 2,  icon: Cpu,         left: '8%',  top: '55%', size: 22, duration: 8,  delay: 1.5 },
+  { id: 3,  icon: BrainCircuit,left: '4%',  top: '78%', size: 30, duration: 7,  delay: 3   },
+  { id: 4,  icon: Zap,         left: '14%', top: '38%', size: 20, duration: 9,  delay: 0.8 },
+  { id: 5,  icon: Code2,       left: '11%', top: '68%', size: 24, duration: 7,  delay: 4   },
+
+  // Colonne droite
+  { id: 6,  icon: Laptop,      left: '88%', top: '18%', size: 28, duration: 8,  delay: 2   },
+  { id: 7,  icon: Smartphone,  left: '92%', top: '48%', size: 22, duration: 6,  delay: 0.5 },
+  { id: 8,  icon: Headphones,  left: '86%', top: '72%', size: 26, duration: 9,  delay: 3.5 },
+  { id: 9,  icon: ShoppingBag, left: '82%', top: '35%', size: 20, duration: 7,  delay: 1.2 },
+  { id: 10, icon: Package,     left: '90%', top: '62%', size: 24, duration: 8,  delay: 4.5 },
+
+  // Haut / bas — centre
+  { id: 11, icon: Rocket,      left: '28%', top: '8%',  size: 26, duration: 7,  delay: 1   },
+  { id: 12, icon: Globe,       left: '55%', top: '6%',  size: 22, duration: 9,  delay: 2.5 },
+  { id: 13, icon: Star,        left: '72%', top: '10%', size: 18, duration: 6,  delay: 0.3 },
+  { id: 14, icon: Sparkles,    left: '40%', top: '88%', size: 20, duration: 8,  delay: 1.8 },
+  { id: 15, icon: Zap,         left: '62%', top: '85%', size: 22, duration: 7,  delay: 3.2 },
+]

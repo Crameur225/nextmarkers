@@ -9,7 +9,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
           {/* Brand */}
           <div>
-            <p className="font-bold text-white text-lg mb-3">NextMakers</p>
+            <p className="font-bold text-(--text-primary) text-lg mb-3">NextMakers</p>
             <p className="text-sm text-(--text-secondary) leading-relaxed max-w-xs">
               Les outils qui construisent votre avenir.
             </p>
@@ -32,7 +32,7 @@ export function Footer() {
                 <li key={href}>
                   <Link
                     href={href}
-                    className="text-sm text-(--text-secondary) hover:text-white transition-colors"
+                    className="text-sm text-(--text-secondary) hover:text-(--text-primary) transition-colors"
                   >
                     {label}
                   </Link>
