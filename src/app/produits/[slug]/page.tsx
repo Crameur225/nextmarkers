@@ -61,8 +61,16 @@ export default async function ProduitPage({ params }: Props) {
       </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-        {/* Left — Gallery */}
-        <ProductImageGallery images={product.images} name={product.name} />
+        {/* Left — Gallery + media */}
+        <div className="flex flex-col gap-4">
+          <ProductImageGallery images={product.images} name={product.name} />
+          {(product.audios ?? []).map((url, i) => (
+            <audio key={i} src={url} controls className="w-full rounded-xl" />
+          ))}
+          {(product.videos ?? []).map((url, i) => (
+            <video key={i} src={url} controls className="w-full rounded-xl max-h-64" />
+          ))}
+        </div>
 
         {/* Right — Info */}
         <div className="flex flex-col gap-6">

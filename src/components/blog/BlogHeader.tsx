@@ -6,7 +6,7 @@ interface BlogHeaderProps {
   description: string
   date: string
   updated?: string
-  category: 'IA' | 'Amazon' | 'Productivité'
+  category: string
   tags: string[]
   readingTime?: number
   affiliateDisclosure?: boolean

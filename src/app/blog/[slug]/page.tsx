@@ -61,7 +61,7 @@ export default async function BlogPostPage({ params }: PageProps) {
           description={post.description}
           date={post.createdAt}
           updated={post.updatedAt}
-          category={post.category as 'IA' | 'Amazon' | 'Productivité'}
+          category={post.category}
           tags={post.tags}
           affiliateDisclosure={post.affiliateDisclosure}
         />
@@ -73,6 +73,31 @@ export default async function BlogPostPage({ params }: PageProps) {
             <MDXRemote source={post.content ?? ''} components={useMDXComponents({})} />
           )}
         </div>
+
+        {(post.images ?? []).length > 0 && (
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {(post.images ?? []).map((url, i) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img key={i} src={url} alt="" className="w-full rounded-xl object-cover" />
+            ))}
+          </div>
+        )}
+
+        {(post.audios ?? []).length > 0 && (
+          <div className="mt-6 flex flex-col gap-3">
+            {(post.audios ?? []).map((url, i) => (
+              <audio key={i} src={url} controls className="w-full rounded-xl" />
+            ))}
+          </div>
+        )}
+
+        {(post.videos ?? []).length > 0 && (
+          <div className="mt-6 flex flex-col gap-4">
+            {(post.videos ?? []).map((url, i) => (
+              <video key={i} src={url} controls className="w-full rounded-xl max-h-96" />
+            ))}
+          </div>
+        )}
       </article>
     </>
   )

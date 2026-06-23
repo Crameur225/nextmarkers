@@ -2,13 +2,15 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, Package, FileText, Users, LogOut } from 'lucide-react'
+import { LayoutDashboard, Package, FileText, Users, LogOut, Store, Tag } from 'lucide-react'
 import { cn } from '@/lib/cn'
 
 const NAV = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { href: '/admin/produits', label: 'Produits', icon: Package },
   { href: '/admin/posts', label: 'Articles', icon: FileText },
+  { href: '/admin/providers', label: 'Providers', icon: Store },
+  { href: '/admin/categories', label: 'Catégories', icon: Tag },
   { href: '/admin/abonnes', label: 'Abonnés', icon: Users },
 ]
 

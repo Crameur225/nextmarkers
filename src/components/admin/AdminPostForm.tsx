@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import type { Post } from '@/lib/api'
+import type { Post, Category } from '@/lib/api'
 import { RichTextEditor } from './RichTextEditor'
+import { MediaUploader } from './MediaUploader'
 import { SocialPublisher } from './SocialPublisher'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'
@@ -22,9 +23,12 @@ const EMPTY: PostDraft = {
   slug: '',
   description: '',
   content: '',
-  category: 'IA',
+  category: '',
   tags: [],
   heroImage: '',
+  images: [],
+  audios: [],
+  videos: [],
   affiliateDisclosure: false,
   published: false,
 }
@@ -50,6 +54,15 @@ export function AdminPostForm({ initial, id }: Props) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [savedSlug, setSavedSlug] = useState(initial?.slug ?? '')
+  const [categories, setCategories] = useState<Category[]>([])
+
+  useEffect(() => {
+    fetch(`${API_URL}/api/categories?contentType=post`).then(r => r.json()).then((data: Category[]) => {
+      setCategories(data)
+      if (!form.category && data.length > 0) set('category', data[0].name)
+    }).catch(() => {})
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   function set<K extends keyof PostDraft>(key: K, value: PostDraft[K]) {
     setForm((prev) => ({ ...prev, [key]: value }))
@@ -116,13 +129,10 @@ export function AdminPostForm({ initial, id }: Props) {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Field label="Catégorie">
           <select value={form.category} onChange={(e) => set('category', e.target.value)} className="field-input">
-            <option>IA</option>
-            <option>Guides</option>
-            <option>Productivité</option>
-            <option>Amazon</option>
-            <option>Vidéo</option>
-            <option>Audio</option>
-            <option>Développement</option>
+            {categories.length === 0 && <option value="">Chargement…</option>}
+            {categories.map((c) => (
+              <option key={c.id} value={c.name}>{c.name}</option>
+            ))}
           </select>
         </Field>
         <Field label="Image hero (URL)">
@@ -133,9 +143,19 @@ export function AdminPostForm({ initial, id }: Props) {
         </Field>
       </div>
 
-      {/* Rich text editor */}
       <Field label="Contenu">
         <RichTextEditor value={form.content ?? ''} onChange={(html) => set('content', html)} />
+      </Field>
+
+      <Field label="Médias supplémentaires">
+        <MediaUploader
+          images={form.images}
+          audios={form.audios}
+          videos={form.videos}
+          onImagesChange={(urls) => set('images', urls)}
+          onAudiosChange={(urls) => set('audios', urls)}
+          onVideosChange={(urls) => set('videos', urls)}
+        />
       </Field>
 
       <div className="flex items-center gap-6">
@@ -164,7 +184,6 @@ export function AdminPostForm({ initial, id }: Props) {
         </button>
       </div>
 
-      {/* Social publishing — visible only once article is saved */}
       {savedSlug && form.published && (
         <SocialPublisher
           title={form.title}

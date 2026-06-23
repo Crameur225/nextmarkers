@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { ImageUploader } from './ImageUploader'
+import { MediaUploader } from './MediaUploader'
 import { SocialPublisher } from './SocialPublisher'
-import type { Product } from '@/lib/api'
+import type { Product, Provider, Category } from '@/lib/api'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'
 
@@ -23,11 +23,13 @@ const EMPTY: ProductDraft = {
   description: '',
   shortDesc: '',
   images: [],
+  audios: [],
+  videos: [],
   price: '',
   currency: 'EUR',
   affiliateUrl: '',
-  provider: 'amazon',
-  category: 'IA',
+  provider: '',
+  category: '',
   tags: [],
   published: false,
   featured: false,
@@ -54,6 +56,20 @@ export function AdminProductForm({ initial, id }: Props) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [savedSlug, setSavedSlug] = useState(initial?.slug ?? '')
+  const [providers, setProviders] = useState<Provider[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
+
+  useEffect(() => {
+    fetch(`${API_URL}/api/providers`).then(r => r.json()).then((data: Provider[]) => {
+      setProviders(data)
+      if (!form.provider && data.length > 0) set('provider', data[0].name)
+    }).catch(() => {})
+    fetch(`${API_URL}/api/categories?contentType=product`).then(r => r.json()).then((data: Category[]) => {
+      setCategories(data)
+      if (!form.category && data.length > 0) set('category', data[0].name)
+    }).catch(() => {})
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   function set<K extends keyof ProductDraft>(key: K, value: ProductDraft[K]) {
     setForm((prev) => ({ ...prev, [key]: value }))
@@ -61,6 +77,8 @@ export function AdminProductForm({ initial, id }: Props) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (!form.provider) return setError('Sélectionne un provider.')
+    if (!form.category) return setError('Sélectionne une catégorie.')
     setSaving(true)
     setError('')
 
@@ -147,10 +165,10 @@ export function AdminProductForm({ initial, id }: Props) {
         </Field>
         <Field label="Catégorie">
           <select value={form.category} onChange={(e) => set('category', e.target.value)} className="field-input">
-            <option>IA</option>
-            <option>Amazon</option>
-            <option>Productivité</option>
-            <option>Développement</option>
+            {categories.length === 0 && <option value="">Chargement…</option>}
+            {categories.map((c) => (
+              <option key={c.id} value={c.name}>{c.name}</option>
+            ))}
           </select>
         </Field>
       </div>
@@ -158,13 +176,10 @@ export function AdminProductForm({ initial, id }: Props) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field label="Provider">
           <select value={form.provider} onChange={(e) => set('provider', e.target.value)} className="field-input">
-            <option value="amazon">Amazon</option>
-            <option value="fnac">Fnac</option>
-            <option value="darty">Darty</option>
-            <option value="boulanger">Boulanger</option>
-            <option value="aliexpress">AliExpress</option>
-            <option value="cdiscount">Cdiscount</option>
-            <option value="default">Autre</option>
+            {providers.length === 0 && <option value="">Chargement…</option>}
+            {providers.map((p) => (
+              <option key={p.id} value={p.name}>{p.label}</option>
+            ))}
           </select>
         </Field>
         <Field label="URL d'affiliation">
@@ -176,8 +191,15 @@ export function AdminProductForm({ initial, id }: Props) {
         <input value={tagsInput} onChange={(e) => setTagsInput(e.target.value)} className="field-input" placeholder="ia, outil, productivité" />
       </Field>
 
-      <Field label="Images">
-        <ImageUploader value={form.images} onChange={(urls) => set('images', urls)} />
+      <Field label="Médias">
+        <MediaUploader
+          images={form.images}
+          audios={form.audios}
+          videos={form.videos}
+          onImagesChange={(urls) => set('images', urls)}
+          onAudiosChange={(urls) => set('audios', urls)}
+          onVideosChange={(urls) => set('videos', urls)}
+        />
       </Field>
 
       <div className="flex items-center gap-6">
@@ -206,7 +228,6 @@ export function AdminProductForm({ initial, id }: Props) {
         </button>
       </div>
 
-      {/* Social publishing — visible only once product is saved & published */}
       {savedSlug && form.published && (
         <SocialPublisher
           title={form.name}

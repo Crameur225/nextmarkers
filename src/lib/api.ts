@@ -7,6 +7,8 @@ export interface Product {
   description: string
   shortDesc: string
   images: string[]
+  audios: string[]
+  videos: string[]
   price?: string
   currency: string
   affiliateUrl: string
@@ -28,8 +30,30 @@ export interface Post {
   category: string
   tags: string[]
   heroImage?: string
+  images: string[]
+  audios: string[]
+  videos: string[]
   affiliateDisclosure: boolean
   published: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Provider {
+  id: string
+  name: string
+  label: string
+  iconUrl?: string
+  color: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Category {
+  id: string
+  name: string
+  color: string
+  contentType: 'product' | 'post' | 'both'
   createdAt: string
   updatedAt: string
 }
@@ -82,6 +106,27 @@ export const api = {
       apiFetch<Post>(`/api/posts/${id}`, { method: 'PUT', body: JSON.stringify(data), headers: { Authorization: `Bearer ${token}` } }),
     delete: (id: string, token = '') =>
       apiFetch<{ success: boolean }>(`/api/posts/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }),
+  },
+  providers: {
+    list: () => apiFetch<Provider[]>('/api/providers'),
+    get: (id: string) => apiFetch<Provider>(`/api/providers/${id}`),
+    create: (data: Partial<Provider>, token = '') =>
+      apiFetch<Provider>('/api/providers', { method: 'POST', body: JSON.stringify(data), headers: { Authorization: `Bearer ${token}` } }),
+    update: (id: string, data: Partial<Provider>, token = '') =>
+      apiFetch<Provider>(`/api/providers/${id}`, { method: 'PUT', body: JSON.stringify(data), headers: { Authorization: `Bearer ${token}` } }),
+    delete: (id: string, token = '') =>
+      apiFetch<{ success: boolean }>(`/api/providers/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }),
+  },
+  categories: {
+    list: (contentType?: 'product' | 'post' | 'both') =>
+      apiFetch<Category[]>(`/api/categories${contentType ? `?contentType=${contentType}` : ''}`),
+    get: (id: string) => apiFetch<Category>(`/api/categories/${id}`),
+    create: (data: Partial<Category>, token = '') =>
+      apiFetch<Category>('/api/categories', { method: 'POST', body: JSON.stringify(data), headers: { Authorization: `Bearer ${token}` } }),
+    update: (id: string, data: Partial<Category>, token = '') =>
+      apiFetch<Category>(`/api/categories/${id}`, { method: 'PUT', body: JSON.stringify(data), headers: { Authorization: `Bearer ${token}` } }),
+    delete: (id: string, token = '') =>
+      apiFetch<{ success: boolean }>(`/api/categories/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }),
   },
   subscribers: {
     list: (token = '') => apiFetch<Subscriber[]>('/api/newsletter', {
