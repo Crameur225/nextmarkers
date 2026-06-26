@@ -1,6 +1,6 @@
 import { api } from '@/lib/api'
 import Link from 'next/link'
-import { Plus, Eye, EyeOff } from 'lucide-react'
+import { Plus, Eye, EyeOff, MousePointerClick } from 'lucide-react'
 import { AdminProductActions } from '@/components/admin/AdminProductActions'
 import { cookies } from 'next/headers'
 
@@ -35,20 +35,48 @@ export default async function AdminProduitsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-(--border-subtle)">
-                <th className="text-left px-5 py-3 font-medium text-(--text-muted)">Nom</th>
-                <th className="text-left px-5 py-3 font-medium text-(--text-muted)">Catégorie</th>
-                <th className="text-left px-5 py-3 font-medium text-(--text-muted)">Prix</th>
-                <th className="text-left px-5 py-3 font-medium text-(--text-muted)">Statut</th>
-                <th className="px-5 py-3" />
+                <th className="text-left px-4 py-3 font-medium text-(--text-muted) w-14" />
+                <th className="text-left px-4 py-3 font-medium text-(--text-muted)">Produit</th>
+                <th className="text-left px-4 py-3 font-medium text-(--text-muted)">Prix</th>
+                <th className="text-left px-4 py-3 font-medium text-(--text-muted)">Statut</th>
+                <th className="text-left px-4 py-3 font-medium text-(--text-muted)">
+                  <span className="flex items-center gap-1"><Eye size={13} /> Vues</span>
+                </th>
+                <th className="text-left px-4 py-3 font-medium text-(--text-muted)">
+                  <span className="flex items-center gap-1"><MousePointerClick size={13} /> Clics</span>
+                </th>
+                <th className="px-4 py-3" />
               </tr>
             </thead>
             <tbody className="divide-y divide-(--border-subtle)">
               {products.map((p) => (
                 <tr key={p.id} className="hover:bg-(--bg-elevated)/40 transition-colors">
-                  <td className="px-5 py-3.5 font-medium text-(--text-primary)">{p.name}</td>
-                  <td className="px-5 py-3.5 text-(--text-secondary)">{p.category}</td>
-                  <td className="px-5 py-3.5 text-(--text-secondary)">{p.price ?? '—'}</td>
-                  <td className="px-5 py-3.5">
+                  {/* Thumbnail */}
+                  <td className="px-4 py-3">
+                    {p.images[0] ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={p.images[0]}
+                        alt=""
+                        className="w-11 h-11 rounded-lg object-cover border border-(--border-subtle)"
+                      />
+                    ) : (
+                      <div className="w-11 h-11 rounded-lg bg-(--bg-surface) border border-(--border-subtle) flex items-center justify-center text-(--text-muted) text-[10px]">
+                        —
+                      </div>
+                    )}
+                  </td>
+                  {/* Nom + desc */}
+                  <td className="px-4 py-3">
+                    <p className="font-semibold text-(--text-primary) leading-tight">{p.name}</p>
+                    <p className="text-xs text-(--text-muted) mt-0.5 line-clamp-1 max-w-xs">
+                      {p.shortDesc || p.description?.slice(0, 60) || '—'}
+                    </p>
+                  </td>
+                  {/* Prix */}
+                  <td className="px-4 py-3 text-(--text-secondary) whitespace-nowrap">{p.price ?? '—'}</td>
+                  {/* Statut */}
+                  <td className="px-4 py-3">
                     {p.published ? (
                       <span className="inline-flex items-center gap-1 text-xs font-medium text-green-400">
                         <Eye size={11} /> Publié
@@ -59,7 +87,12 @@ export default async function AdminProduitsPage() {
                       </span>
                     )}
                   </td>
-                  <td className="px-5 py-3.5">
+                  {/* Vues */}
+                  <td className="px-4 py-3 text-(--text-secondary) tabular-nums">{p.views ?? 0}</td>
+                  {/* Clics */}
+                  <td className="px-4 py-3 text-(--text-secondary) tabular-nums">{p.clicks ?? 0}</td>
+                  {/* Actions */}
+                  <td className="px-4 py-3">
                     <AdminProductActions id={p.id} />
                   </td>
                 </tr>

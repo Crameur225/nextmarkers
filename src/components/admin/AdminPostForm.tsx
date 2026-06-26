@@ -6,6 +6,8 @@ import type { Post, Category } from '@/lib/api'
 import { RichTextEditor } from './RichTextEditor'
 import { MediaUploader } from './MediaUploader'
 import { SocialPublisher } from './SocialPublisher'
+import { PostPreview } from './PostPreview'
+import { Eye, EyeOff } from 'lucide-react'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'
 
@@ -16,7 +18,7 @@ function getToken() {
     ?.split('=')[1]
 }
 
-type PostDraft = Omit<Post, 'id' | 'createdAt' | 'updatedAt'>
+type PostDraft = Omit<Post, 'id' | 'createdAt' | 'updatedAt' | 'views'>
 
 const EMPTY: PostDraft = {
   title: '',
@@ -29,6 +31,7 @@ const EMPTY: PostDraft = {
   images: [],
   audios: [],
   videos: [],
+  author: '',
   affiliateDisclosure: false,
   published: false,
 }
@@ -55,6 +58,7 @@ export function AdminPostForm({ initial, id }: Props) {
   const [error, setError] = useState('')
   const [savedSlug, setSavedSlug] = useState(initial?.slug ?? '')
   const [categories, setCategories] = useState<Category[]>([])
+  const [showPreview, setShowPreview] = useState(false)
 
   useEffect(() => {
     fetch(`${API_URL}/api/categories?contentType=post`).then(r => r.json()).then((data: Category[]) => {
@@ -104,7 +108,24 @@ export function AdminPostForm({ initial, id }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+    <div className={`flex gap-8 ${showPreview ? 'items-start' : ''}`}>
+    <form onSubmit={handleSubmit} className={`flex flex-col gap-6 ${showPreview ? 'flex-1 min-w-0' : 'w-full'}`}>
+
+      {/* Preview toggle */}
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={() => setShowPreview(!showPreview)}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border
+            ${showPreview
+              ? 'bg-green-500/15 text-green-400 border-green-500/30'
+              : 'text-(--text-muted) border-(--border-subtle) hover:text-(--text-primary) hover:border-(--border-default)'}`}
+        >
+          {showPreview ? <EyeOff size={13} /> : <Eye size={13} />}
+          {showPreview ? 'Masquer l\'aperçu' : 'Aperçu live'}
+        </button>
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field label="Titre">
           <input
@@ -122,11 +143,25 @@ export function AdminPostForm({ initial, id }: Props) {
         </Field>
       </div>
 
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Field label="Auteur">
+          <input
+            value={form.author ?? ''}
+            onChange={(e) => set('author', e.target.value)}
+            placeholder="Gael Agbé"
+            className="field-input"
+          />
+        </Field>
+        <Field label="Image hero (URL)">
+          <input value={form.heroImage ?? ''} onChange={(e) => set('heroImage', e.target.value)} className="field-input" placeholder="https://..." />
+        </Field>
+      </div>
+
       <Field label="Description (méta / accroche)">
         <textarea value={form.description} onChange={(e) => set('description', e.target.value)} rows={2} required className="field-input resize-none" />
       </Field>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field label="Catégorie">
           <select value={form.category} onChange={(e) => set('category', e.target.value)} className="field-input">
             {categories.length === 0 && <option value="">Chargement…</option>}
@@ -134,9 +169,6 @@ export function AdminPostForm({ initial, id }: Props) {
               <option key={c.id} value={c.name}>{c.name}</option>
             ))}
           </select>
-        </Field>
-        <Field label="Image hero (URL)">
-          <input value={form.heroImage ?? ''} onChange={(e) => set('heroImage', e.target.value)} className="field-input" placeholder="https://..." />
         </Field>
         <Field label="Tags (séparés par des virgules)">
           <input value={tagsInput} onChange={(e) => setTagsInput(e.target.value)} className="field-input" placeholder="ia, chatgpt" />
@@ -193,6 +225,15 @@ export function AdminPostForm({ initial, id }: Props) {
         />
       )}
     </form>
+
+    {/* Live preview panel */}
+    {showPreview && (
+      <div className="w-80 shrink-0 sticky top-6">
+        <p className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider mb-3">Aperçu</p>
+        <PostPreview form={form} />
+      </div>
+    )}
+    </div>
   )
 }
 

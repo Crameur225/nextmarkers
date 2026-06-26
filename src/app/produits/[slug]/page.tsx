@@ -115,6 +115,7 @@ export default async function ProduitPage({ params }: Props) {
             provider={product.provider}
             price={product.price ?? undefined}
             size="lg"
+            productId={product.id}
           />
 
           {/* Tags */}

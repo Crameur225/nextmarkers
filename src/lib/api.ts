@@ -17,6 +17,8 @@ export interface Product {
   tags: string[]
   published: boolean
   featured: boolean
+  views: number
+  clicks: number
   createdAt: string
   updatedAt: string
 }
@@ -33,8 +35,10 @@ export interface Post {
   images: string[]
   audios: string[]
   videos: string[]
+  author?: string
   affiliateDisclosure: boolean
   published: boolean
+  views: number
   createdAt: string
   updatedAt: string
 }
@@ -92,6 +96,8 @@ export const api = {
       apiFetch<Product>(`/api/products/${id}`, { method: 'PUT', body: JSON.stringify(data), headers: { Authorization: `Bearer ${token}` } }),
     delete: (id: string, token = '') =>
       apiFetch<{ success: boolean }>(`/api/products/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }),
+    trackClick: (id: string) =>
+      fetch(`${API_URL}/api/products/${id}/click`, { method: 'POST' }).catch(() => {}),
   },
   posts: {
     list: (params?: string) => apiFetch<Post[]>(`/api/posts${params ? `?${params}` : ''}`),

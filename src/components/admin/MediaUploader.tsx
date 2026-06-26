@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Upload, Link2, X, Plus, Image, Music, Video } from 'lucide-react'
+import { Upload, Link2, X, Plus, Image, Music, Video, Loader2 } from 'lucide-react'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'
 
@@ -20,15 +20,15 @@ interface Props {
   onVideosChange: (urls: string[]) => void
 }
 
-const TAB_CONFIG: { id: Tab; label: string; icon: React.ReactNode; accept: string }[] = [
-  { id: 'images', label: 'Images', icon: <Image size={14} />, accept: 'image/*' },
-  { id: 'audios', label: 'Audio', icon: <Music size={14} />, accept: 'audio/*' },
-  { id: 'videos', label: 'Vidéo', icon: <Video size={14} />, accept: 'video/*' },
+const TAB_CONFIG: { id: Tab; label: string; icon: React.ReactNode; accept: string; multiple: boolean }[] = [
+  { id: 'images', label: 'Images', icon: <Image size={14} />, accept: 'image/*', multiple: true },
+  { id: 'audios', label: 'Audio', icon: <Music size={14} />, accept: 'audio/*', multiple: true },
+  { id: 'videos', label: 'Vidéo', icon: <Video size={14} />, accept: 'video/*', multiple: true },
 ]
 
 export function MediaUploader({ images, audios, videos, onImagesChange, onAudiosChange, onVideosChange }: Props) {
   const [tab, setTab] = useState<Tab>('images')
-  const [uploading, setUploading] = useState(false)
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null)
   const [error, setError] = useState('')
   const [urlInput, setUrlInput] = useState('')
   const [showUrlInput, setShowUrlInput] = useState(false)
@@ -48,15 +48,9 @@ export function MediaUploader({ images, audios, videos, onImagesChange, onAudios
     setShowUrlInput(false)
   }
 
-  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setUploading(true)
-    setError('')
-
+  async function uploadFile(file: File): Promise<string | null> {
     const fd = new FormData()
     fd.append('file', file)
-
     try {
       const res = await fetch(`${API_URL}/api/upload`, {
         method: 'POST',
@@ -68,16 +62,34 @@ export function MediaUploader({ images, audios, videos, onImagesChange, onAudios
         throw new Error(data.error ?? data.detail ?? `HTTP ${res.status}`)
       }
       const data = await res.json() as { url: string }
-      onChange([...items, data.url])
+      return data.url
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur upload')
-    } finally {
-      setUploading(false)
-      if (fileInputRef.current) fileInputRef.current.value = ''
+      return null
     }
   }
 
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? [])
+    if (!files.length) return
+
+    setError('')
+    setProgress({ done: 0, total: files.length })
+
+    const newUrls: string[] = []
+    for (const file of files) {
+      const url = await uploadFile(file)
+      if (url) newUrls.push(url)
+      setProgress((p) => p ? { ...p, done: p.done + 1 } : null)
+    }
+
+    if (newUrls.length) onChange([...items, ...newUrls])
+    setProgress(null)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
   const currentTab = TAB_CONFIG.find((t) => t.id === tab)!
+  const isUploading = progress !== null
 
   return (
     <div className="flex flex-col gap-3">
@@ -108,27 +120,51 @@ export function MediaUploader({ images, audios, videos, onImagesChange, onAudios
         })}
       </div>
 
-      {/* Media list */}
-      {items.length > 0 && (
-        <div className="flex flex-col gap-2">
+      {/* Images — 2-col grid */}
+      {tab === 'images' && items.length > 0 && (
+        <div className="grid grid-cols-2 gap-2">
           {items.map((url, i) => (
             <div key={i} className="group relative rounded-xl overflow-hidden border border-(--border-subtle) bg-(--bg-surface)">
-              {tab === 'images' && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={url} alt="" className="w-full h-32 object-cover" />
-              )}
-              {tab === 'audios' && (
-                <div className="p-3">
-                  <audio controls src={url} className="w-full" />
-                  <p className="text-xs text-(--text-muted) mt-1 truncate">{url}</p>
-                </div>
-              )}
-              {tab === 'videos' && (
-                <div className="p-3">
-                  <video controls src={url} className="w-full rounded-lg max-h-40" />
-                  <p className="text-xs text-(--text-muted) mt-1 truncate">{url}</p>
-                </div>
-              )}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={url} alt="" className="w-full h-40 object-cover" />
+              <button
+                type="button"
+                onClick={() => remove(i)}
+                className="absolute top-1.5 right-1.5 p-1 rounded-lg bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500/80"
+              >
+                <X size={13} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Audio list */}
+      {tab === 'audios' && items.length > 0 && (
+        <div className="flex flex-col gap-2">
+          {items.map((url, i) => (
+            <div key={i} className="group relative rounded-xl border border-(--border-subtle) bg-(--bg-surface) p-3">
+              <audio controls src={url} className="w-full" />
+              <p className="text-xs text-(--text-muted) mt-1 truncate">{url}</p>
+              <button
+                type="button"
+                onClick={() => remove(i)}
+                className="absolute top-2 right-2 p-1 rounded-lg bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500/80"
+              >
+                <X size={13} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Video list */}
+      {tab === 'videos' && items.length > 0 && (
+        <div className="flex flex-col gap-2">
+          {items.map((url, i) => (
+            <div key={i} className="group relative rounded-xl border border-(--border-subtle) bg-(--bg-surface) p-3">
+              <video controls src={url} className="w-full rounded-lg max-h-52" />
+              <p className="text-xs text-(--text-muted) mt-1 truncate">{url}</p>
               <button
                 type="button"
                 onClick={() => remove(i)}
@@ -142,22 +178,25 @@ export function MediaUploader({ images, audios, videos, onImagesChange, onAudios
       )}
 
       {/* Actions */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 items-center">
         <input
           ref={fileInputRef}
           type="file"
           accept={currentTab.accept}
+          multiple={currentTab.multiple}
           className="hidden"
           onChange={handleFileChange}
         />
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          disabled={uploading}
+          disabled={isUploading}
           className="flex items-center gap-2 px-3 py-2 rounded-xl border border-(--border-subtle) text-xs font-medium text-(--text-secondary) hover:border-(--border-default) hover:text-(--text-primary) disabled:opacity-50 transition-all"
         >
-          <Upload size={13} className={uploading ? 'animate-bounce' : ''} />
-          {uploading ? 'Upload…' : 'Uploader'}
+          {isUploading ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}
+          {isUploading
+            ? `${progress!.done} / ${progress!.total} fichiers…`
+            : tab === 'images' ? 'Uploader des images' : 'Uploader'}
         </button>
         <button
           type="button"

@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { MediaUploader } from './MediaUploader'
 import { SocialPublisher } from './SocialPublisher'
+import { ProductPreview } from './ProductPreview'
+import { Eye, EyeOff } from 'lucide-react'
 import type { Product, Provider, Category } from '@/lib/api'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'
@@ -15,7 +17,7 @@ function getToken() {
     ?.split('=')[1]
 }
 
-type ProductDraft = Omit<Product, 'id' | 'createdAt' | 'updatedAt'>
+type ProductDraft = Omit<Product, 'id' | 'createdAt' | 'updatedAt' | 'views' | 'clicks'>
 
 const EMPTY: ProductDraft = {
   name: '',
@@ -58,6 +60,7 @@ export function AdminProductForm({ initial, id }: Props) {
   const [savedSlug, setSavedSlug] = useState(initial?.slug ?? '')
   const [providers, setProviders] = useState<Provider[]>([])
   const [categories, setCategories] = useState<Category[]>([])
+  const [showPreview, setShowPreview] = useState(false)
 
   useEffect(() => {
     fetch(`${API_URL}/api/providers`).then(r => r.json()).then((data: Provider[]) => {
@@ -113,7 +116,23 @@ export function AdminProductForm({ initial, id }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-6 max-w-2xl">
+    <div className={`flex gap-8 ${showPreview ? 'items-start' : ''}`}>
+    <form onSubmit={handleSubmit} className={`flex flex-col gap-6 ${showPreview ? 'flex-1 min-w-0' : 'max-w-2xl w-full'}`}>
+      {/* Preview toggle */}
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={() => setShowPreview(!showPreview)}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border
+            ${showPreview
+              ? 'bg-green-500/15 text-green-400 border-green-500/30'
+              : 'text-(--text-muted) border-(--border-subtle) hover:text-(--text-primary) hover:border-(--border-default)'}`}
+        >
+          {showPreview ? <EyeOff size={13} /> : <Eye size={13} />}
+          {showPreview ? 'Masquer l\'aperçu' : 'Aperçu live'}
+        </button>
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field label="Nom">
           <input
@@ -237,6 +256,15 @@ export function AdminProductForm({ initial, id }: Props) {
         />
       )}
     </form>
+
+    {/* Live preview panel */}
+    {showPreview && (
+      <div className="w-80 shrink-0 sticky top-6">
+        <p className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider mb-3">Aperçu</p>
+        <ProductPreview form={form} />
+      </div>
+    )}
+    </div>
   )
 }
 

@@ -35,17 +35,33 @@ export default async function AdminPostsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-(--border-subtle)">
-                <th className="text-left px-5 py-3 font-medium text-(--text-muted)">Titre</th>
+                <th className="text-left px-5 py-3 font-medium text-(--text-muted)">Article</th>
+                <th className="text-left px-5 py-3 font-medium text-(--text-muted)">Auteur</th>
                 <th className="text-left px-5 py-3 font-medium text-(--text-muted)">Catégorie</th>
                 <th className="text-left px-5 py-3 font-medium text-(--text-muted)">Statut</th>
+                <th className="text-left px-5 py-3 font-medium text-(--text-muted)">
+                  <span className="flex items-center gap-1"><Eye size={13} /> Vues</span>
+                </th>
                 <th className="px-5 py-3" />
               </tr>
             </thead>
             <tbody className="divide-y divide-(--border-subtle)">
               {posts.map((p) => (
                 <tr key={p.id} className="hover:bg-(--bg-elevated)/40 transition-colors">
-                  <td className="px-5 py-3.5 font-medium text-(--text-primary)">{p.title}</td>
+                  {/* Titre + desc */}
+                  <td className="px-5 py-3.5">
+                    <p className="font-semibold text-(--text-primary) leading-tight">{p.title}</p>
+                    <p className="text-xs text-(--text-muted) mt-0.5 line-clamp-1 max-w-xs">
+                      {p.description?.slice(0, 70) || '—'}
+                    </p>
+                  </td>
+                  {/* Auteur */}
+                  <td className="px-5 py-3.5 text-(--text-secondary) text-xs whitespace-nowrap">
+                    {p.author || '—'}
+                  </td>
+                  {/* Catégorie */}
                   <td className="px-5 py-3.5 text-(--text-secondary)">{p.category}</td>
+                  {/* Statut */}
                   <td className="px-5 py-3.5">
                     {p.published ? (
                       <span className="inline-flex items-center gap-1 text-xs font-medium text-green-400">
@@ -57,6 +73,9 @@ export default async function AdminPostsPage() {
                       </span>
                     )}
                   </td>
+                  {/* Vues */}
+                  <td className="px-5 py-3.5 text-(--text-secondary) tabular-nums">{p.views ?? 0}</td>
+                  {/* Actions */}
                   <td className="px-5 py-3.5">
                     <AdminPostActions id={p.id} />
                   </td>
