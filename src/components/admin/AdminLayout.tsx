@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, Package, FileText, Users, LogOut, Store, Tag } from 'lucide-react'
+import { LayoutDashboard, Package, FileText, Users, LogOut, Store, Tag, Mail } from 'lucide-react'
 import { cn } from '@/lib/cn'
 
 const NAV = [
@@ -12,6 +12,7 @@ const NAV = [
   { href: '/admin/providers', label: 'Providers', icon: Store },
   { href: '/admin/categories', label: 'Catégories', icon: Tag },
   { href: '/admin/abonnes', label: 'Abonnés', icon: Users },
+  { href: '/admin/newsletter', label: 'Newsletter', icon: Mail },
 ]
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {

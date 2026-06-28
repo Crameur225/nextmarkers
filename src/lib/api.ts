@@ -65,7 +65,20 @@ export interface Category {
 export interface Subscriber {
   id: string
   email: string
+  unsubscribed: boolean
   createdAt: string
+}
+
+export interface Campaign {
+  id: string
+  subject: string
+  sentAt: string | null
+  recipientCount: number
+  createdAt: string
+  totalOpens: number
+  uniqueOpens: number
+  totalClicks: number
+  uniqueClicks: number
 }
 
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
@@ -139,6 +152,17 @@ export const api = {
       headers: { Authorization: `Bearer ${token}` },
       cache: 'no-store',
     }),
+  },
+  campaigns: {
+    list: (token = '') => apiFetch<Campaign[]>('/api/newsletter/campaigns', {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: 'no-store',
+    }),
+    send: (data: { subject: string; html: string }, token = '') =>
+      apiFetch<{ success: boolean; campaignId: string; recipientCount: number }>(
+        '/api/newsletter/campaigns',
+        { method: 'POST', body: JSON.stringify(data), headers: { Authorization: `Bearer ${token}` } }
+      ),
   },
   auth: {
     login: (email: string, password: string) =>

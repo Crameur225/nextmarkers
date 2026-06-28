@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { Resend } from 'resend'
+import { mailer } from '@/lib/mailer'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 const rateLimitMap = new Map<string, number>()
@@ -48,15 +47,13 @@ export async function POST(req: NextRequest) {
     }
 
     const to = process.env.CONTACT_EMAIL
-    const from = process.env.RESEND_FROM_EMAIL ?? 'NextMakers <noreply@nextmakers.net>'
-
     if (!to) {
       console.error('[contact] CONTACT_EMAIL manquant')
       return NextResponse.json({ error: 'Erreur de configuration.' }, { status: 500 })
     }
 
-    await resend.emails.send({
-      from,
+    await mailer.sendMail({
+      from: `"NextMakers" <${process.env.SMTP_USER}>`,
       to,
       replyTo: email,
       subject: `[Contact] Message de ${name.trim()}`,
