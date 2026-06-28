@@ -66,7 +66,7 @@ export function NavBar() {
         <div className="flex items-center gap-2 shrink-0">
           <ThemeToggle />
           <a
-            href="#newsletter"
+            href="/newsletter"
             className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white bg-green-500 hover:bg-green-400 transition-colors"
           >
             Newsletter
@@ -101,7 +101,7 @@ export function NavBar() {
             </Link>
           ))}
           <a
-            href="#newsletter"
+            href="/newsletter"
             className="block mt-2 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-green-500 hover:bg-green-400 transition-colors text-center"
             onClick={() => setIsMobileOpen(false)}
           >

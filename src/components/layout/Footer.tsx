@@ -50,7 +50,7 @@ export function Footer() {
               Une sélection d&apos;outils et d&apos;innovations chaque semaine dans ta boîte mail.
             </p>
             <a
-              href="#newsletter"
+              href="/newsletter"
               className="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-white bg-green-500 hover:bg-green-400 transition-colors"
             >
               S&apos;inscrire gratuitement →
