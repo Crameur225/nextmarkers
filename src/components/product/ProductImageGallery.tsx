@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { ShoppingCart } from 'lucide-react'
+import { TiltImage } from './TiltImage'
 
 interface ProductImageGalleryProps {
   images: string[]
@@ -23,7 +24,7 @@ export function ProductImageGallery({ images, name }: ProductImageGalleryProps) 
   return (
     <div className="flex flex-col gap-4">
       {/* Main image */}
-      <div className="relative aspect-square rounded-2xl overflow-hidden bg-(--bg-elevated)">
+      <TiltImage variant="detail" className="relative aspect-square rounded-2xl overflow-hidden bg-(--bg-elevated)">
         <Image
           src={images[active]}
           alt={`${name} — image ${active + 1}`}
@@ -32,7 +33,7 @@ export function ProductImageGallery({ images, name }: ProductImageGalleryProps) 
           sizes="(max-width: 768px) 100vw, 50vw"
           priority
         />
-      </div>
+      </TiltImage>
 
       {/* Thumbnails */}
       {images.length > 1 && (

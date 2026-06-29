@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight, ShoppingCart } from 'lucide-react'
 import type { Product } from '@/lib/api'
+import { TiltImage } from './TiltImage'
 
 const categoryColors: Record<string, string> = {
   IA: 'bg-green-500/15 text-green-600 dark:text-green-400',
@@ -19,28 +20,30 @@ export function ProductCard({ product }: ProductCardProps) {
   const heroImage = images[0]
 
   return (
-    <div className="card-glass rounded-2xl overflow-hidden flex flex-col group">
+    <div className="card-glass rounded-2xl flex flex-col group">
       {/* Image */}
-      <Link href={`/produits/${slug}`} className="block relative aspect-[4/3] bg-(--bg-elevated) overflow-hidden">
-        {heroImage ? (
-          <Image
-            src={heroImage}
-            alt={name}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <ShoppingCart size={40} className="text-(--text-muted)" />
-          </div>
-        )}
-        {/* Provider badge */}
-        {provider === 'amazon' && (
-          <span className="absolute top-3 left-3 bg-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-            Amazon
-          </span>
-        )}
+      <Link href={`/produits/${slug}`} className="block">
+        <TiltImage variant="card" className="relative aspect-[4/3] bg-(--bg-elevated) overflow-hidden rounded-t-2xl">
+          {heroImage ? (
+            <Image
+              src={heroImage}
+              alt={name}
+              fill
+              className="object-cover"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <ShoppingCart size={40} className="text-(--text-muted)" />
+            </div>
+          )}
+          {/* Provider badge */}
+          {provider === 'amazon' && (
+            <span className="absolute top-3 left-3 bg-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+              Amazon
+            </span>
+          )}
+        </TiltImage>
       </Link>
 
       {/* Content */}
